@@ -44,7 +44,9 @@ public class TestNet2Params extends NetworkParameters {
         genesisBlock.setDifficultyTarget(CoinDefinition.testnetGenesisBlockDifficultyTarget);
         genesisBlock.setNonce(CoinDefinition.testnetGenesisBlockNonce);
         spendableCoinbaseDepth = CoinDefinition.spendableCoinbaseDepth;
-
+        mergedMiningEnabled = CoinDefinition.testnetMergedMineEnable;
+        mergedMineStartTime = CoinDefinition.testnetMergedMineStartTime;
+        mergedMineChainID = CoinDefinition.testnetMergedMineChainID;
         String genesisHash = genesisBlock.getHashAsString();
         checkState(genesisHash.equals(CoinDefinition.testnetGenesisHash));
         CoinDefinition.initCheckpoints(checkpoints);

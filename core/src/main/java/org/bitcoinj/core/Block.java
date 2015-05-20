@@ -87,10 +87,13 @@ public class Block extends Message {
     // TODO: Get rid of all the direct accesses to this field. It's a long-since unnecessary holdover from the Dalvik days.
     /** If null, it means this object holds only the headers. */
     @Nullable List<Transaction> transactions;
-
+    // merged-mining
+    private transient boolean lastByteNull;
     /** Stores the hash of the block. If null, getHash() will recalculate it. */
     private transient Sha256Hash hash;
     private transient Sha256Hash scryptHash;
+    // merged-mining
+    private transient BlockMergeMined mmBlock;
     private transient boolean headerParsed;
     private transient boolean transactionsParsed;
 
@@ -135,7 +138,11 @@ public class Block extends Message {
         super(params, payloadBytes, 0, parseLazy, parseRetain, length);
     }
 
+    public Block(NetworkParameters params, byte[] payloadBytes, byte[] bytes, boolean parseLazy, boolean parseRetain, int length, int cursor)
+            throws ProtocolException {
+        super(params, bytes, payloadBytes, 0, parseLazy, parseRetain, length, cursor);
 
+    }
     /**
      * Construct a block initialized with all the given fields.
      * @param params Which network the block is for.
@@ -194,8 +201,44 @@ public class Block extends Message {
         nonce = readUint32();
 
         hash = new Sha256Hash(Utils.reverseBytes(doubleDigest(payload, offset, cursor)));
-
         headerParsed = true;
+        // merged-mining
+        if((version & BlockMergeMined.BLOCK_VERSION_AUXPOW) > 0 && (mmBlock == null || !mmBlock.IsValid()))
+        {
+            // if the block passed in is not just the headers, but header/mminfo/transactions
+            // then payloadBytes is null so assume its in the bytes information (if bytes has more than just the header)
+            byte[] bytesforMMBlock = this.payloadBytes;
+            int mmCursor = this.payloadCursor;
+            if(bytesforMMBlock == null)
+            {
+                if(payload != null && payload.length > (Block.HEADER_SIZE+1))
+                {
+                    mmCursor = cursor;
+                    bytesforMMBlock = this.payload;
+                }
+            }
+
+            mmBlock = new BlockMergeMined(params, bytesforMMBlock, mmCursor, this);
+
+            // first transaction byte which should be null for header only blocks
+            if(isMMBlock() && bytesforMMBlock != null && bytesforMMBlock.length > (mmCursor + mmBlock.getMessageSize()) && bytesforMMBlock[mmCursor + mmBlock.getMessageSize()] == 0 )
+            {
+                lastByteNull = true;
+            }
+        }
+        else
+        {
+            // first transaction byte which should be null for header only blocks
+            // length is only set for blocks that are passed in as headers only (80 bytes)
+            if(payload != null && payload.length > cursor && payload[cursor] == 0 && length == Block.HEADER_SIZE )
+            {
+                lastByteNull = true;
+
+
+            }
+        }
+
+
         headerBytesValid = parseRetain;
     }
 
@@ -205,13 +248,21 @@ public class Block extends Message {
 
         cursor = offset + HEADER_SIZE;
         optimalEncodingMessageSize = HEADER_SIZE;
-        if (payload.length == cursor) {
+        if (payload.length == cursor || isLastByteNull()) {
             // This message is just a header, it has no transactions.
             transactionsParsed = true;
             transactionBytesValid = false;
             return;
         }
-
+        // merged-mining
+        if(isMMBlock())
+        {
+            cursor += getMMBlockSize();
+        }
+        if(cursor > payload.length)
+        {
+            throw new ProtocolException("Trying to parse a block for transactions passed the end of the size of the block");
+        }
         int numTransactions = (int) readVarInt();
         optimalEncodingMessageSize += VarInt.sizeOf(numTransactions);
         transactions = new ArrayList<Transaction>(numTransactions);
@@ -250,6 +301,7 @@ public class Block extends Message {
     protected void parseLite() throws ProtocolException {
         // Ignore the header since it has fixed length. If length is not provided we will have to
         // invoke a light parse of transactions to calculate the length.
+        // merged-mining
         if (length == UNKNOWN_LENGTH) {
             Preconditions.checkState(parseLazy,
                     "Performing lite parse of block transaction as block was initialised from byte array " +
@@ -257,7 +309,7 @@ public class Block extends Message {
             parseTransactions();
             length = cursor - offset;
         } else {
-            transactionBytesValid = !transactionsParsed || parseRetain && length > HEADER_SIZE;
+            transactionBytesValid = !transactionsParsed || parseRetain && length > (HEADER_SIZE+getMMBlockSize());
         }
         headerBytesValid = !headerParsed || parseRetain && length >= HEADER_SIZE;
     }
@@ -402,8 +454,9 @@ public class Block extends Message {
         }
 
         // confirmed we must have transactions either cached or as objects.
-        if (transactionBytesValid && payload != null && payload.length >= offset + length) {
-            stream.write(payload, offset + HEADER_SIZE, length - HEADER_SIZE);
+        // merged-mining
+        if (transactionBytesValid && payload != null && payload.length >= offset + length + getMMBlockSize()) {
+            stream.write(payload, offset + HEADER_SIZE, length - HEADER_SIZE -  getMMBlockSize());
             return;
         }
 
@@ -522,7 +575,7 @@ public class Block extends Message {
         try {
             ByteArrayOutputStream bos = new UnsafeByteArrayOutputStream(HEADER_SIZE);
             writeHeader(bos);
-            return new Sha256Hash(Utils.reverseBytes(Utils.doubleDigest(payload, offset, cursor)));
+            return new Sha256Hash(Utils.reverseBytes(Utils.scryptDigest(bos.toByteArray())));
         } catch (IOException e) {
             throw new RuntimeException(e); // Cannot happen.
         }
@@ -613,6 +666,13 @@ public class Block extends Message {
         s.append("   nonce: ");
         s.append(nonce);
         s.append("\n");
+        // merged-mining
+        if(isMMBlock())
+        {
+            s.append("   Merged-mining info: \n");
+            s.append(mmBlock.toString());
+            s.append("\n");
+        }
         if (transactions != null && transactions.size() > 0) {
             s.append("   with ").append(transactions.size()).append(" transaction(s):\n");
             for (Transaction tx : transactions) {
@@ -670,18 +730,48 @@ public class Block extends Message {
         BigInteger target = getDifficultyTargetAsInteger();
 
         BigInteger h = null;
-        switch (CoinDefinition.coinPOWHash)
+        // merged-mined
+        if(time >= params.mergedMineStartTime)
         {
-            case scrypt:
-                h = getScryptHash().toBigInteger();
-                break;
-            case SHA256:
-                h = getHash().toBigInteger();
-                break;
-            default:  //use the normal getHash() method.
-                h = getHash().toBigInteger();
-                break;
+            if(isMMBlock())
+            {
+                h = mmBlock.getParentBlockHash().toBigInteger();
+                mmBlock.checkProofOfWork(throwException);
+
+            }
+            else {
+                switch (CoinDefinition.coinPOWHash)
+                {
+                    case scrypt:
+                        h = getScryptHash().toBigInteger();
+                        break;
+                    case SHA256:
+                        h = getHash().toBigInteger();
+                        break;
+                    default:  //use the normal getHash() method.
+                        h = getHash().toBigInteger();
+                        break;
+                }
+            }
         }
+        else
+        {
+            if(isMMBlock())
+                throw new VerificationException("Merged-mine block was found before merged-mining was turned on at time: " + params.mergedMineStartTime + "(Block 17000)");
+            switch (CoinDefinition.coinPOWHash)
+            {
+                case scrypt:
+                    h = getScryptHash().toBigInteger();
+                    break;
+                case SHA256:
+                    h = getHash().toBigInteger();
+                    break;
+                default:  //use the normal getHash() method.
+                    h = getHash().toBigInteger();
+                    break;
+            }
+        }
+
         if (h.compareTo(target) > 0) {
             // Proof of work check failed!
             if (throwException)
@@ -1123,5 +1213,25 @@ public class Block extends Message {
     @VisibleForTesting
     boolean isTransactionBytesValid() {
         return transactionBytesValid;
+    }
+    int getMMBlockSize()
+    {
+        if(mmBlock != null)
+        {
+            return mmBlock.getMessageSize();
+        }
+        return 0;
+    }
+    public boolean isLastByteNull()
+    {
+        return lastByteNull;
+    }
+    boolean isMMBlock(){
+        maybeParseHeader();
+        return (params.mergedMiningEnabled && (version & BlockMergeMined.BLOCK_VERSION_AUXPOW) > 0) && mmBlock.IsValid();
+    }
+    public void setVersion(int v)
+    {
+        version = v;
     }
 }

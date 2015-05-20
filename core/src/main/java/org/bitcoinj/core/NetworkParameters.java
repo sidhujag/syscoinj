@@ -91,7 +91,10 @@ public abstract class NetworkParameters implements Serializable {
      */
     protected int spendableCoinbaseDepth;
     protected int subsidyDecreaseBlockCount;
-    
+    // merged-mining
+    protected boolean mergedMiningEnabled;
+    protected long mergedMineStartTime;
+    protected long mergedMineChainID;
     protected int[] acceptableAddressCodes;
     protected String[] dnsSeeds;
     protected HttpDiscovery.Details[] httpSeeds = new HttpDiscovery.Details[] {};
@@ -99,6 +102,10 @@ public abstract class NetworkParameters implements Serializable {
 
     protected NetworkParameters() {
         alertSigningKey = SATOSHI_KEY;
+
+        mergedMiningEnabled = false;
+        mergedMineStartTime = 0;
+        mergedMineChainID = 0x0001;
         genesisBlock = createGenesis(this);
     }
       /**

@@ -72,7 +72,8 @@ public class HeadersMessage extends Message {
             cursor = saveCursor;
 
             // Each header has 80 bytes and one more byte for transactions number which is 00.
-            length = 81 * (int)numHeaders;
+            // merged-mining
+            length = 0;
         }
     }
 
@@ -88,10 +89,15 @@ public class HeadersMessage extends Message {
         for (int i = 0; i < numHeaders; ++i) {
             // Read 80 bytes of the header and one more byte for the transaction list, which is always a 00 because the
             // transaction list is empty.
-            byte[] blockHeader = readBytes(81);
-            if (blockHeader[80] != 0)
-                throw new ProtocolException("Block header does not end with a null byte");
-            Block newBlockHeader = new Block(this.params, blockHeader, true, true, 81);
+            // merged-mining
+            byte[] header = readBytes(81);
+            Block newBlockHeader = new Block(this.params, payload,header, false, false, 80, cursor-1);
+            if(newBlockHeader.isMMBlock())
+            {
+                cursor += newBlockHeader.getMMBlockSize();
+            }
+            if(!newBlockHeader.isLastByteNull())
+                throw new ProtocolException("Last byte of header must be null");
             blockHeaders.add(newBlockHeader);
         }
 

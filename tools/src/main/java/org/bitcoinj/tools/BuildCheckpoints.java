@@ -140,7 +140,7 @@ public class BuildCheckpoints {
         CheckpointManager manager = new CheckpointManager(PARAMS, new FileInputStream(file));
         checkState(manager.numCheckpoints() == expectedSize);
 
-        if (PARAMS.getId().equals(NetworkParameters.ID_MAINNET)) {
+       /* if (PARAMS.getId().equals(NetworkParameters.ID_MAINNET)) {
             StoredBlock test = manager.getCheckpointBefore(1390500000); // Thu Jan 23 19:00:00 CET 2014
             checkState(test.getHeight() == 280224);
             checkState(test.getHeader().getHashAsString()
@@ -150,6 +150,6 @@ public class BuildCheckpoints {
             checkState(test.getHeight() == 167328);
             checkState(test.getHeader().getHashAsString()
                     .equals("0000000000035ae7d5025c2538067fe7adb1cf5d5d9c31b024137d9090ed13a9"));
-        }
+        }*/
     }
 }
