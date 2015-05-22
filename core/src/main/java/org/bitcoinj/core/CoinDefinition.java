@@ -89,7 +89,7 @@ public class CoinDefinition {
     public static final long mergedMineChainID = 0x0001;
 
     // hard forks that we care about
-    private static long HardForkB2Block = 350000;
+    private static long HardForkB2Block = 450000;
     public static boolean HasReachedMainNetForkB2(NetworkParameters params, int nHeight) {
 
         return (params.getId().equals(NetworkParameters.ID_TESTNET) || nHeight >= CoinDefinition.HardForkB2Block);
