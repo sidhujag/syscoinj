@@ -12,18 +12,35 @@ public class CoinDefinition {
     public static final String coinName = "Syscoin";
     public static final String coinTicker = "SYS";
     public static final String coinURIScheme = "syscoin";
-    public static final String cryptsyMarketId = "155";
-    public static final String cryptsyMarketCurrency = "BTC";
-    public static final String PATTERN_PRIVATE_KEY_START = "[7X]";
+    public static final String cryptsyMarketId = "278";
+    public static final String cryptsyMarketCurrency = "SYS";
+    public static final String PATTERN_PRIVATE_KEY_START_UNCOMPRESSED = "[6]";
+    public static final String PATTERN_PRIVATE_KEY_START_COMPRESSED = "[V]";
+
+	public enum CoinPrecision {
+        Coins,
+        Millicoins,
+    }
+    public static final CoinPrecision coinPrecision = CoinPrecision.Coins;
 
 
-    public static final String BLOCKEXPLORER_BASE_URL_PROD = "http://explorer.darkcoin.io/";    //blockr.io
+    public static final String UNSPENT_API_URL = "https://chainz.cryptoid.info/sys/api.dws?q=unspent";
+    public static final String UNSPENT_API_KEY = "8de530ee17c3";
+    public enum UnspentAPIType {
+        BitEasy,
+        Blockr,
+        Abe,
+        Cryptoid,
+    };
+    
+    public static final UnspentAPIType UnspentAPI = UnspentAPIType.Cryptoid;
+    public static final String BLOCKEXPLORER_BASE_URL_PROD = "http://blockexperts.com/sys";    //blockr.io
     public static final String BLOCKEXPLORER_ADDRESS_PATH = "address/";             //blockr.io path
     public static final String BLOCKEXPLORER_TRANSACTION_PATH = "tx/";              //blockr.io path
-    public static final String BLOCKEXPLORER_BLOCK_PATH = "block/";                 //blockr.io path
+    public static final String BLOCKEXPLORER_BLOCK_PATH = "height/";                 //blockr.io path
     public static final String BLOCKEXPLORER_BASE_URL_TEST = BLOCKEXPLORER_BASE_URL_PROD;
 
-    public static final String DONATION_ADDRESS = "UiMKDgW6t6NrbSpQtgihYKJ7hGMZ1k47io";
+    public static final String DONATION_ADDRESS = "";
     public static final String DONATION_ADDRESS_TESTNET = "";
 
     enum CoinHash {
@@ -97,7 +114,13 @@ public class CoinDefinition {
     }
     //net.cpp strDNSSeed
     static public String[] dnsSeeds = new String[] {
-            "dnsseed.unionpluscoin.org",
+            "seed.syscoin.tk",
+            "seed.syscoinseed.tk",
+            "107.170.159.167",
+            "104.131.228.46",
+            "stella.hopto.org",
+            "syscoin.selfip.com",
+            "dnsseed.syscoin.org"
 
     };
 
@@ -152,27 +175,37 @@ public class CoinDefinition {
     public static BigInteger proofOfWorkLimit = Utils.decodeCompactBits(0x1e0fffffL);  //main.cpp bnProofOfWorkLimit (~uint256(0) >> 20); // syscoin: starting difficulty is 1 / 2^12
 
     static public String[] testnetDnsSeeds = new String[] {
-            "testnet-seed.unionpluscoin.org",
+            "stella.hopto.org",
+            "syscoin.selfip.com",
+            "testnet-seed.syscoin.tk"
     };
     //from main.h: CAlert::CheckSignature
     public static final String SATOSHI_KEY = "04a0a5a88b2cebf0d6a7d20214e6bd51c903645505f72d05d536c9f3b996ec428150931cc6e9943f8603f756907b8793d715cb3b4fcca2735110c324c98158f456";
     public static final String TESTNET_SATOSHI_KEY = "0400a665daf19bf39db0d2072ea4edd5ca7a9070b81001934bfd4fa0d12561b105be22ea92c4608555f97819ffeb1c80cd701fcc43cd6a38ceefb128699e593aa3";
 
     /** The string returned by getId() for the main, production network where people trade things. */
-    public static final String ID_MAINNET = "org.unionpluscoin.production";
+    public static final String ID_MAINNET = "org.syscoin.production";
     /** The string returned by getId() for the testnet. */
-    public static final String ID_TESTNET = "org.unionpluscoin.test";
+    public static final String ID_TESTNET = "org.syscoin.test";
     /** Unit test network. */
-    public static final String ID_UNITTESTNET = "org.unionpluscoin.unittest";
+    public static final String ID_UNITTESTNET = "org.syscoin.unittest";
     /** Reg test network. */
-    public static final String ID_REGTEST = "org.unionpluscoin.regtest";
+    public static final String ID_REGTEST = "org.syscoin.regtest";
 
     //checkpoints.cpp Checkpoints::mapCheckpoints
     public static void initCheckpoints(Map<Integer, Sha256Hash> checkpoints)
     {
-        checkpoints.put( 0, new Sha256Hash("0000060fea0bd344a174eeb71f3f6a06a1eb91b037c8f3c10825354df11674c8"));
-
+        checkpoints.put( 0, new Sha256Hash("c84c8d0f52a7418b28a24e7b5354d6febed47c8cc33b3fa20fdbe4b3a1fcd9c4"));
+        checkpoints.put( 10360, new Sha256Hash("dd8d9937d8bb5784f161407442b84055280c7b843942d35d912db4a7562875f1"));
+        checkpoints.put( 48912, new Sha256Hash("a5504453a92ca1aa324a39dde92756195688bae94adac3e6c1887450e6625c09"));
+        checkpoints.put( 68104, new Sha256Hash("7185ce7e3c8bd0d76a307c91af4d4d75c62e40e3c84380009598c5b0797747bb"));
+        checkpoints.put( 80700, new Sha256Hash("24e06f5775b755d91cd5cd264271662c2a94c9a7b1c6d63894a2bf7af1b14cc3"));
+        checkpoints.put( 80700, new Sha256Hash("24e06f5775b755d91cd5cd264271662c2a94c9a7b1c6d63894a2bf7af1b14cc3"));
+        checkpoints.put( 101901, new Sha256Hash("b3d4b27af1b75db3009791f455acfff616ab4dff70c1258393a8a7586876a4a3"));
+        checkpoints.put( 116182, new Sha256Hash("3b563424f766c83b7bd4f71cbfa55d36bd63e78e3203df316aa8955a208192e1"));
     }
+
+
     public static void testnetInitCheckpoints(Map<Integer, Sha256Hash> checkpoints)
     {
         checkpoints.put( 0, new Sha256Hash("00000220ae9f6f4b878a6b2550e94148e78fa66b49846a9e447637d37af49a96"));
