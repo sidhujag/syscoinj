@@ -14,8 +14,10 @@ public class CoinDefinition {
     public static final String coinURIScheme = "syscoin";
     public static final String cryptsyMarketId = "278";
     public static final String cryptsyMarketCurrency = "SYS";
-    public static final String PATTERN_PRIVATE_KEY_START_UNCOMPRESSED = "[6]";
-    public static final String PATTERN_PRIVATE_KEY_START_COMPRESSED = "[V]";
+    public static final String PATTERN_PRIVATE_KEY_START = "[KL]";
+    public static final String PATTERN_PRIVATE_KEY_START_COMPRESSED = "V";
+    public static final String PATTERN_PRIVATE_KEY_START_TESTNET = "9";
+    public static final String PATTERN_PRIVATE_KEY_START_COMPRESSED_TESTNET = "c";
 
 	public enum CoinPrecision {
         Coins,
@@ -32,9 +34,9 @@ public class CoinDefinition {
         Abe,
         Cryptoid,
     };
-    
+
     public static final UnspentAPIType UnspentAPI = UnspentAPIType.Cryptoid;
-    public static final String BLOCKEXPLORER_BASE_URL_PROD = "http://blockexperts.com/sys";    //blockr.io
+    public static final String BLOCKEXPLORER_BASE_URL_PROD = "http://blockexperts.com/sys/";    //blockr.io
     public static final String BLOCKEXPLORER_ADDRESS_PATH = "address/";             //blockr.io path
     public static final String BLOCKEXPLORER_TRANSACTION_PATH = "tx/";              //blockr.io path
     public static final String BLOCKEXPLORER_BLOCK_PATH = "height/";                 //blockr.io path
@@ -208,7 +210,7 @@ public class CoinDefinition {
 
     public static void testnetInitCheckpoints(Map<Integer, Sha256Hash> checkpoints)
     {
-        checkpoints.put( 0, new Sha256Hash("00000220ae9f6f4b878a6b2550e94148e78fa66b49846a9e447637d37af49a96"));
+       // checkpoints.put( 0, new Sha256Hash("00000220ae9f6f4b878a6b2550e94148e78fa66b49846a9e447637d37af49a96"));
 
     }
 
