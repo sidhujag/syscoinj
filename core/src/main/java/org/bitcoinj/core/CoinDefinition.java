@@ -72,14 +72,14 @@ public class CoinDefinition {
     public static final Coin MAX_MONEY = COIN.multiply(MAX_COINS);                //main.h:  MAX_MONEY
 
     public static final Coin DEFAULT_MIN_TX_FEE = CENT.multiply(5);   // MIN_TX_FEE
-    public static final Coin DUST_LIMIT = Coin.valueOf(1000); //main.h CTransaction::GetMinFee        0.01 coins
+    public static final Coin DUST_LIMIT = Coin.valueOf(1000); //main.h CTransaction::GetMinFee        0.00001 coins
 
     public static final int PROTOCOL_VERSION = 70051;          //version.h PROTOCOL_VERSION
     public static final int MIN_PROTOCOL_VERSION = 70005;        //version.h MIN_PROTO_VERSION
     public static final int BIP0031_VERSION = 60000;
 
     public static final int BLOCK_CURRENTVERSION = 2;   //CBlock::CURRENT_VERSION
-    public static final int MAX_BLOCK_SIZE = 1000 * 1000;
+    public static final int MAX_BLOCK_SIZE = 2 * 1024 * 1024;
 
     public static final int Port    = 8369;       //protocol.h GetDefaultPort(testnet=false)
     public static final int TestPort = 18369;     //protocol.h GetDefaultPort(testnet=true)
