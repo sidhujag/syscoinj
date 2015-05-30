@@ -534,8 +534,8 @@ public class Transaction extends ChildMessage implements Serializable {
         // 4 = length of lock_time field (uint32)
         cursor += 4;
         varint = new VarInt(buf, cursor);
-        long dataCount = varint.value + 1;
-        cursor += (varint.getOriginalSizeInBytes()*dataCount);
+        long dataLen = variant.value;
+        cursor += dataLen + varint.getOriginalSizeInBytes();
         return cursor - offset;
     }
 
