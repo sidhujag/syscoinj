@@ -116,13 +116,10 @@ public class CoinDefinition {
     }
     //net.cpp strDNSSeed
     static public String[] dnsSeeds = new String[] {
+            "syscoinseed.tk",
             "seed.syscoin.tk",
-            "seed.syscoinseed.tk",
-            "107.170.159.167",
-            "104.131.228.46",
-            "stella.hopto.org",
-            "syscoin.selfip.com",
-            "dnsseed.syscoin.org"
+            "seed1.syscoinseed.tk",
+            "seed2.syscoinseed.tk"
 
     };
 
@@ -177,9 +174,7 @@ public class CoinDefinition {
     public static BigInteger proofOfWorkLimit = Utils.decodeCompactBits(0x1e0fffffL);  //main.cpp bnProofOfWorkLimit (~uint256(0) >> 20); // syscoin: starting difficulty is 1 / 2^12
 
     static public String[] testnetDnsSeeds = new String[] {
-            "stella.hopto.org",
-            "syscoin.selfip.com",
-            "testnet-seed.syscoin.tk"
+            "testnet-syscoinseed.tk"
     };
     //from main.h: CAlert::CheckSignature
     public static final String SATOSHI_KEY = "04a0a5a88b2cebf0d6a7d20214e6bd51c903645505f72d05d536c9f3b996ec428150931cc6e9943f8603f756907b8793d715cb3b4fcca2735110c324c98158f456";

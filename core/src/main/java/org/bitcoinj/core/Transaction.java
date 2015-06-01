@@ -534,7 +534,7 @@ public class Transaction extends ChildMessage implements Serializable {
         // 4 = length of lock_time field (uint32)
         cursor += 4;
         varint = new VarInt(buf, cursor);
-        long dataLen = variant.value;
+        long dataLen = varint.value;
         cursor += dataLen + varint.getOriginalSizeInBytes();
         return cursor - offset;
     }
@@ -1051,6 +1051,10 @@ public class Transaction extends ChildMessage implements Serializable {
         if(data != null) {
             stream.write(new VarInt(data.length).encode());
             stream.write(data);
+        }
+        else {
+            // syscoin: just write out 0 length for data field if no data exists for this tx
+            stream.write(new VarInt(0).encode());
         }
     }
 
