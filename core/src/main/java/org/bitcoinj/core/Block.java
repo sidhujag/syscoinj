@@ -203,7 +203,7 @@ public class Block extends Message {
         hash = new Sha256Hash(Utils.reverseBytes(doubleDigest(payload, offset, cursor)));
         headerParsed = true;
         // merged-mining
-        if((version & BlockMergeMined.BLOCK_VERSION_AUXPOW) > 0 && (mmBlock == null || !mmBlock.IsValid()))
+        if(params.mergedMiningEnabled && (version & BlockMergeMined.BLOCK_VERSION_AUXPOW) > 0 && (mmBlock == null || !mmBlock.IsValid()))
         {
             // if the block passed in is not just the headers, but header/mminfo/transactions
             // then payloadBytes is null so assume its in the bytes information (if bytes has more than just the header)

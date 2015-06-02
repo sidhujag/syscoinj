@@ -31,7 +31,7 @@ public class MainNetParams extends NetworkParameters {
         interval = INTERVAL;
         targetTimespan = TARGET_TIMESPAN;
         maxTarget = CoinDefinition.proofOfWorkLimit; //main.cpp bnProofOfWorkLimit (~uint256(0) >> 20); // UnionCoin: starting difficulty is 1 / 2^12
-        dumpedPrivateKeyHeader = CoinDefinition.dumpedPrivateKeyHeader + CoinDefinition.AddressHeader;
+        dumpedPrivateKeyHeader = CoinDefinition.dumpedPrivateKeyHeader;
         addressHeader = CoinDefinition.AddressHeader;
         p2shHeader = CoinDefinition.p2shHeader;
         acceptableAddressCodes = new int[] { addressHeader, p2shHeader };

@@ -40,6 +40,9 @@ public class UnitTestParams extends NetworkParameters {
         genesisBlock.setTime(System.currentTimeMillis() / 1000);
         genesisBlock.setDifficultyTarget(Block.EASIEST_DIFFICULTY_TARGET);
         genesisBlock.solve();
+        mergedMiningEnabled = CoinDefinition.mergedMineEnable;
+        mergedMineStartTime = CoinDefinition.mergedMineStartTime;
+        mergedMineChainID = CoinDefinition.mergedMineChainID;
         port = 18333;
         interval = 10;
         dumpedPrivateKeyHeader = 239;
