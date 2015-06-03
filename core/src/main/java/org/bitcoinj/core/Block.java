@@ -99,7 +99,7 @@ public class Block extends Message {
 
     private transient boolean headerBytesValid;
     private transient boolean transactionBytesValid;
-    
+
     // Blocks can be encoded in a way that will use more bytes than is optimal (due to VarInts having multiple encodings)
     // MAX_BLOCK_SIZE must be compared to the optimal encoding, not the actual encoding, so when parsing, we keep track
     // of the size of the ideal encoding in addition to the actual message size (which Message needs)
@@ -126,8 +126,8 @@ public class Block extends Message {
      * Contruct a block object from the Bitcoin wire format.
      * @param params NetworkParameters object.
      * @param parseLazy Whether to perform a full parse immediately or delay until a read is requested.
-     * @param parseRetain Whether to retain the backing byte array for quick reserialization.  
-     * If true and the backing byte array is invalidated due to modification of a field then 
+     * @param parseRetain Whether to retain the backing byte array for quick reserialization.
+     * If true and the backing byte array is invalidated due to modification of a field then
      * the cached bytes may be repopulated and retained if the message is serialized again in the future.
      * @param length The length of message if known.  Usually this is provided when deserializing of the wire
      * as the length will be provided as part of the header.  If unknown then set to Message.UNKNOWN_LENGTH
@@ -286,7 +286,7 @@ public class Block extends Message {
         parseTransactions();
         length = cursor - offset;
     }
-    
+
     public int getOptimalEncodingMessageSize() {
         if (optimalEncodingMessageSize != 0)
             return optimalEncodingMessageSize;
@@ -637,6 +637,9 @@ public class Block extends Message {
         block.difficultyTarget = difficultyTarget;
         block.transactions = null;
         block.hash = getHash();
+        block.scryptHash = getScryptHash();
+        block.mmBlock = mmBlock;
+        block.lastByteNull = lastByteNull;
         return block;
     }
 
@@ -1228,7 +1231,7 @@ public class Block extends Message {
     }
     boolean isMMBlock(){
         maybeParseHeader();
-        return (params.mergedMiningEnabled && (version & BlockMergeMined.BLOCK_VERSION_AUXPOW) > 0) && mmBlock.IsValid();
+        return (params.mergedMiningEnabled && (version & BlockMergeMined.BLOCK_VERSION_AUXPOW) > 0) && mmBlock != null && mmBlock.IsValid();
     }
     public void setVersion(int v)
     {
